@@ -34,3 +34,12 @@ class Network:
         except socket.error as error:
             print(error)
         return None
+
+    def get_state(self):
+        try:
+            self.client.send(str.encode(f"state"))
+            return self.client.recv(4096).decode()
+        except socket.error as error:
+            print(error)
+        print("TASKKKYASDFADF")
+        return None

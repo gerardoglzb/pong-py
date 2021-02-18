@@ -1,17 +1,10 @@
 import socket
 from _thread import *
-from enum import Enum
-
-class State(Enum):
-    OFF = 0
-    WAITING = 1,
-    ONGOING = 2,
-    CANCELLED = 3,
-    FINISHED = 4
+from GameState import GameState
 
 server = "127.0.0.1"
 port = 5555
-game_state = State.OFF
+game_state = GameState.OFF
 player_positions = {"1": 565, "2": 565}
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -34,9 +27,14 @@ def game_thread(conn, p):
             if not data:
                 continue
             data_split = data.split()
+            print("dato", data_split[0] == "state")
             if data_split[0] == "move":
                 player_positions[data_split[1]] += int(data_split[2])
                 conn.send(str.encode(f"positions {player_positions['1']} {player_positions['2']}"))
+            elif data_split[0] == "state":
+                print("hoooo")
+                print("Sending state ", game_state.value)
+                conn.send(str.encode(f"{game_state.value}"))
             else:
                 print("Movement error.")
                 conn.send(str.encode(""))
@@ -55,8 +53,10 @@ while True:
     if p1:
         p = 2
         p2 = True
+        game_state = GameState.ONGOING
     else:
         p = 1
         p1 = True
+        game_state = GameState.WAITING
     print(f"Player {p} disconnected!")
     start_new_thread(game_thread, (conn, p))
