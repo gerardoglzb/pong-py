@@ -30,22 +30,22 @@ class Paddle():
 
 	def move(self, keys):
 		movement = keys[pygame.K_LEFT] * -self.speed + keys[pygame.K_RIGHT] * self.speed
-		return self.network.move(movement)
+		return self.network.move_paddle(movement)
 
 	def get_state(self):
 		s = self.network.get_state()
-		print(s)
 		return GameState(s)
 
 
 class Ball():
-	def __init__(self, x_pos, y_pos, radius, speed, direction):
+	def __init__(self, x_pos, y_pos, radius, speed, direction, network):
 		self.x_pos = x_pos
 		self.y_pos = y_pos
 		self.radius = radius
 		self.speed = speed
 		self.direction = direction
 		self.velocity = direction.normalize() * speed
+		self.network = network
 
 	def get_x_pos(self):
 		return int(self.x_pos)
@@ -63,8 +63,12 @@ class Ball():
 		self.velocity.y *= -1
 
 	def move(self):
-		self.x_pos += self.velocity.x
-		self.y_pos += self.velocity.y
+		movement = self.network.move_ball()
+		movement = movement.split()
+		if movement[0] != "position":
+			return
+		self.x_pos = int(movement[1])
+		self.y_pos = int(movement[2])
 
 	def collides_with_paddle(self, paddle):
 		return self.x_pos + self.radius > paddle.get_x_pos_1() and self.x_pos - self.radius < paddle.get_x_pos_2() and abs(self.y_pos - paddle.get_y_pos()) <= self.radius
@@ -88,7 +92,7 @@ screen = pygame.display.set_mode([screen_size_x, screen_size_y])
 paddle1 = Paddle(paddle_vertical_margin, screen_size_x / 2 - paddle_length / 2, paddle_length, paddle_width, paddle_speed, network)
 paddle2 = Paddle(screen_size_y - paddle_vertical_margin, screen_size_x / 2 - paddle_length / 2, paddle_length, paddle_width, paddle_speed, network)
 paddles = [paddle1, paddle2]
-ball = Ball(screen_size_x / 2, screen_size_y / 2, ball_radius, ball_speed, ball_velocity)
+ball = Ball(screen_size_x / 2, screen_size_y / 2, ball_radius, ball_speed, ball_velocity, network)
 game_state = GameState.WAITING
 
 running = True
@@ -101,7 +105,6 @@ while running:
 			running = False
 
 	if game_state == GameState.WAITING:
-		print(network.player_id)
 		if paddles[int(network.player_id)-1].get_state() == GameState.ONGOING:
 			game_state = GameState.ONGOING
 	elif game_state == game_state.ONGOING:
@@ -116,6 +119,7 @@ while running:
 	screen.fill((255, 255, 255))
 
 	ball.move()
+	print("ball", ball.get_x_pos(), ball.get_y_pos())
 
 	pygame.draw.line(screen, (0, 0, 255), (paddle1.get_x_pos_1(), paddle1.get_y_pos()), (paddle1.get_x_pos_2(), paddle1.get_y_pos()), paddle1.get_width())
 	pygame.draw.line(screen, (0, 0, 255), (paddle2.get_x_pos_1(), paddle2.get_y_pos()), (paddle2.get_x_pos_2(), paddle2.get_y_pos()), paddle2.get_width())

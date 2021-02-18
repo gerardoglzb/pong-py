@@ -27,9 +27,17 @@ class Network:
             print(error)
         return None
 
-    def move(self, movement):
+    def move_paddle(self, movement):
         try:
             self.client.send(str.encode(f"move {self.player_id} {movement}"))
+            return self.client.recv(4096).decode()
+        except socket.error as error:
+            print(error)
+        return None
+
+    def move_ball(self):
+        try:
+            self.client.send(str.encode("ball"))
             return self.client.recv(4096).decode()
         except socket.error as error:
             print(error)
@@ -38,8 +46,7 @@ class Network:
     def get_state(self):
         try:
             self.client.send(str.encode(f"state"))
-            return self.client.recv(4096).decode()
+            return int(self.client.recv(4096).decode())
         except socket.error as error:
             print(error)
-        print("TASKKKYASDFADF")
         return None

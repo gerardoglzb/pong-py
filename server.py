@@ -6,6 +6,8 @@ server = "127.0.0.1"
 port = 5555
 game_state = GameState.OFF
 player_positions = {"1": 565, "2": 565}
+ball_position_x = 640
+ball_position_y = 360
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -27,14 +29,15 @@ def game_thread(conn, p):
             if not data:
                 continue
             data_split = data.split()
-            print("dato", data_split[0] == "state")
             if data_split[0] == "move":
                 player_positions[data_split[1]] += int(data_split[2])
                 conn.send(str.encode(f"positions {player_positions['1']} {player_positions['2']}"))
             elif data_split[0] == "state":
-                print("hoooo")
-                print("Sending state ", game_state.value)
                 conn.send(str.encode(f"{game_state.value}"))
+            elif data_split[0] == "ball":
+                print(ball_position_x)
+                print(ball_position_y)
+                conn.send(str.encode(f"position {ball_position_x} {ball_position_y}"))
             else:
                 print("Movement error.")
                 conn.send(str.encode(""))
