@@ -21,5 +21,11 @@ class Paddle():
 	def get_y_pos(self):
 		return self.y_pos
 
+	def get_y_pos_1(self):
+		return self.y_pos - self.width / 2
+
+	def get_y_pos_2(self):
+		return self.y_pos + self.width / 2
+
 	def get_width(self):
 		return self.width

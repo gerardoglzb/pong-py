@@ -24,6 +24,18 @@ class Ball():
 	def reverse_y(self):
 		self.velocity.y *= -1
 
+	def collides_with_paddle_front(self, paddle):
+		is_in_range_x = self.x_pos + self.radius > paddle.get_x_pos_1() and self.x_pos - self.radius < paddle.get_x_pos_2()
+		is_in_range_y = self.y_pos + self.radius >= paddle.get_y_pos_1() and self.y_pos - self.radius <= paddle.get_y_pos_2()
+		return is_in_range_x and is_in_range_y
+
+	def collides_with_paddle_side(self, paddle):
+		comes_from_side = self.x_pos > paddle.get_x_pos_2() or self.x_pos < paddle.get_x_pos_1()
+		return comes_from_side and self.collides_with_paddle_front(paddle)
+
+	def collides_with_paddle(self, paddle):
+		return self.x_pos + self.radius > paddle.get_x_pos_1() and self.x_pos - self.radius < paddle.get_x_pos_2() and abs(self.y_pos - paddle.get_y_pos()) <= self.radius
+
 	def move(self, paddles, screen_size):
 		self.x_pos += self.velocity.x
 		self.y_pos += self.velocity.y
@@ -31,6 +43,7 @@ class Ball():
 			self.reverse_x()
 		elif self.y_pos >= screen_size[1] or self.y_pos <= 0:
 			self.reverse_y()
-
-	def collides_with_paddle(self, paddle):
-		return self.x_pos + self.radius > paddle.get_x_pos_1() and self.x_pos - self.radius < paddle.get_x_pos_2() and abs(self.y_pos - paddle.get_y_pos()) <= self.radius
+		elif self.collides_with_paddle_side(paddles[0]) or self.collides_with_paddle_side(paddles[1]):
+			self.reverse_x()
+		elif self.collides_with_paddle_front(paddles[0]) or self.collides_with_paddle_front(paddles[1]):
+			self.reverse_y()
