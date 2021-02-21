@@ -24,9 +24,13 @@ class Ball():
 	def reverse_y(self):
 		self.velocity.y *= -1
 
-	def move(self, paddles):
+	def move(self, paddles, screen_size):
 		self.x_pos += self.velocity.x
 		self.y_pos += self.velocity.y
+		if self.x_pos >= screen_size[0] or self.x_pos <= 0:
+			self.reverse_x()
+		elif self.y_pos >= screen_size[1] or self.y_pos <= 0:
+			self.reverse_y()
 
 	def collides_with_paddle(self, paddle):
 		return self.x_pos + self.radius > paddle.get_x_pos_1() and self.x_pos - self.radius < paddle.get_x_pos_2() and abs(self.y_pos - paddle.get_y_pos()) <= self.radius

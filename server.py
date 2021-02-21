@@ -15,13 +15,13 @@ header = 64
 player_positions = {"1": 565, "2": 565}
 ball_position_x = 640
 ball_position_y = 360
-ball_speed = 4
+ball_speed = 10
 ball_velocity = Vector2(uniform(-1, 1), uniform(-1, 1)).normalize()
 screen_size = (1280, 720)
 paddle_vertical_margin = 75
 paddle_length = 150
 paddle_width = 25
-paddle_speed = 3
+paddle_speed = 10
 ball_radius = 10
 max_fps = 60
 current_game = Game(screen_size, paddle_vertical_margin, paddle_length, paddle_width, paddle_speed, ball_radius, ball_speed, ball_velocity)
@@ -49,7 +49,7 @@ def game_thread(conn, p):
                 data = data.split()
                 if data[0] == "move":
                     current_game.get_paddles()[int(data[1])-1].shift_x_pos(int(data[2]))
-                    current_game.get_ball().move(current_game.get_paddles())
+                    current_game.get_ball().move(current_game.get_paddles(), screen_size)
                     message = pickle.dumps(current_game)
                     msg_length = len(message)
                     send_length = str(msg_length).encode(encoding_format)
