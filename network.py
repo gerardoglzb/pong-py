@@ -1,4 +1,5 @@
 import socket
+import pickle
 
 
 class Network:
@@ -6,6 +7,8 @@ class Network:
         self.client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.server = "127.0.0.1"
         self.port = 5555
+        self.encoding_format = 'utf-8'
+        self.header = 64
         self.addr = (self.server, self.port)
         self.player_id = self.connect()
 
@@ -19,7 +22,7 @@ class Network:
         except:
             pass
 
-    def send(self, data):
+    def send_string(self, data):
         try:
             self.client.send(str.encode(data))
             return self.client.recv(2048).decode()
@@ -27,23 +30,28 @@ class Network:
             print(error)
         return None
 
-    def move_paddle(self, movement):
+    def send_pickle(self, data):
         try:
-            self.client.send(str.encode(f"move {self.player_id} {movement}"))
-            return self.client.recv(4096).decode()
+            message = data.encode(self.encoding_format)
+            msg_length = len(message)
+            send_length = str(msg_length).encode(self.encoding_format)
+            send_length += b' ' * (self.header - len(send_length))
+            self.client.send(send_length)
+            self.client.send(message)
+            game_length = self.client.recv(self.header).decode(self.encoding_format)
+            if game_length:
+                game_length = int(game_length)
+                game = pickle.loads(self.client.recv(game_length))
+                return game
         except socket.error as error:
             print(error)
         return None
 
-    def move_ball(self):
-        try:
-            self.client.send(str.encode("ball"))
-            return self.client.recv(4096).decode()
-        except socket.error as error:
-            print(error)
-        return None
+    def move_paddle(self, movement):
+        return self.send_pickle(f"move {self.player_id} {movement}")
 
     def get_state(self):
+        print("getting state")
         try:
             self.client.send(str.encode(f"state"))
             return int(self.client.recv(4096).decode())

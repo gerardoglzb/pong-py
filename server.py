@@ -1,13 +1,30 @@
 import socket
+import sys
+import os
 from _thread import *
-from GameState import GameState
+from gameState import GameState
+from random import uniform
+from pygame import Vector2
+from game import Game
+import pickle
 
 server = "127.0.0.1"
 port = 5555
-game_state = GameState.OFF
+encoding_format = 'utf-8'
+header = 64
 player_positions = {"1": 565, "2": 565}
 ball_position_x = 640
 ball_position_y = 360
+ball_speed = 4
+ball_velocity = Vector2(uniform(-1, 1), uniform(-1, 1)).normalize()
+screen_size = (1280, 720)
+paddle_vertical_margin = 75
+paddle_length = 150
+paddle_width = 25
+paddle_speed = 3
+ball_radius = 10
+max_fps = 60
+current_game = Game(screen_size, paddle_vertical_margin, paddle_length, paddle_width, paddle_speed, ball_radius, ball_speed, ball_velocity)
 
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -25,23 +42,29 @@ def game_thread(conn, p):
 
     while True:
         try:
-            data = conn.recv(4096).decode()
-            if not data:
-                continue
-            data_split = data.split()
-            if data_split[0] == "move":
-                player_positions[data_split[1]] += int(data_split[2])
-                conn.send(str.encode(f"positions {player_positions['1']} {player_positions['2']}"))
-            elif data_split[0] == "state":
-                conn.send(str.encode(f"{game_state.value}"))
-            elif data_split[0] == "ball":
-                print(ball_position_x)
-                print(ball_position_y)
-                conn.send(str.encode(f"position {ball_position_x} {ball_position_y}"))
-            else:
-                print("Movement error.")
-                conn.send(str.encode(""))
-        except:
+            data_length = conn.recv(header).decode(encoding_format)
+            if data_length:
+                data_length = int(data_length)
+                data = conn.recv(data_length).decode(encoding_format)
+                data = data.split()
+                if data[0] == "move":
+                    current_game.get_paddles()[int(data[1])-1].shift_x_pos(int(data[2]))
+                    current_game.get_ball().move(current_game.get_paddles())
+                    message = pickle.dumps(current_game)
+                    msg_length = len(message)
+                    send_length = str(msg_length).encode(encoding_format)
+                    send_length += b' ' * (header - len(send_length))
+                    conn.send(send_length)
+                    conn.send(message)
+                    # send length of recv
+                elif data[0] == "state":
+                    conn.send(str.encode(f"{current_game.get_game_state().value}"))
+                else:
+                    conn.send(str.encode(""))
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            print(exc_type, fname, exc_tb.tb_lineno, e)
             break
 
     conn.close()
@@ -56,10 +79,14 @@ while True:
     if p1:
         p = 2
         p2 = True
-        game_state = GameState.ONGOING
+        current_game.set_game_state(GameState.ONGOING)
+        current_game.set_p2(True)
+        print(current_game)
     else:
         p = 1
         p1 = True
-        game_state = GameState.WAITING
+        current_game.set_game_state(GameState.WAITING)
+        current_game.set_p1(True)
+        print(current_game)
     print(f"Player {p} disconnected!")
     start_new_thread(game_thread, (conn, p))
