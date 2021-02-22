@@ -42,6 +42,9 @@ class Ball():
 	def crashing_with_walls(self, screen_size):
 		return self.x_pos >= screen_size[0] or self.x_pos <= 0
 
+	def crashing_with_ceilings(self, screen_size):
+		return self.y_pos >= screen_size[1] or self.y_pos <= 0
+
 	def move(self, paddles, screen_size):
 		self.x_pos += self.velocity.x
 		self.y_pos += self.velocity.y
@@ -50,8 +53,11 @@ class Ball():
 		elif not self.is_crashing and self.crashing_with_walls(screen_size):
 			self.reverse_x()
 			self.is_crashing = True
-		elif self.y_pos >= screen_size[1] or self.y_pos <= 0:
+		elif self.is_crashing and not self.crashing_with_ceilings(screen_size):
+			self.is_crashing = False
+		elif not self.is_crashing and self.crashing_with_ceilings(screen_size):
 			self.reverse_y()
+			self.is_crashing = True
 		if self.is_colliding and not self.collides_with_paddles(paddles):
 			self.is_colliding = False
 		elif not self.is_colliding and self.collides_with_paddles(paddles):
