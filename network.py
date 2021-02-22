@@ -51,7 +51,6 @@ class Network:
         return self.send_pickle(f"move {self.player_id} {movement}")
 
     def get_state(self):
-        print("getting state")
         try:
             self.client.send(str.encode(f"state"))
             return int(self.client.recv(4096).decode())
