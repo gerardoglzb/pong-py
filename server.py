@@ -81,12 +81,10 @@ while True:
         p2 = True
         current_game.set_game_state(GameState.ONGOING)
         current_game.set_p2(True)
-        print(current_game)
     else:
         p = 1
         p1 = True
         current_game.set_game_state(GameState.WAITING)
         current_game.set_p1(True)
-        print(current_game)
     print(f"Player {p} disconnected!")
     start_new_thread(game_thread, (conn, p))
