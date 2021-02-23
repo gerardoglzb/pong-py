@@ -6,6 +6,9 @@ class Paddle():
 		self.width = width
 		self.speed = speed
 
+	def get_length(self):
+		return self.length
+
 	def get_x_pos_1(self):
 		return self.x_pos
 

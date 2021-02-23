@@ -3,14 +3,16 @@ from paddle import Paddle
 from gameState import GameState
 
 class Game():
-	def __init__(self, screen_size, paddle_vertical_margin, paddle_length, paddle_width, paddle_speed, ball_radius, ball_speed, ball_velocity):
+	def __init__(self, screen_size, paddle_vertical_margin, paddle_length, paddle_width, paddle_speed, ball_radius, ball_speed):
 		self.p1 = False
 		self.p2 = False
 		self.game_state = GameState.OFF
 		paddle1 = Paddle(paddle_vertical_margin, screen_size[0] / 2 - paddle_length / 2, paddle_length, paddle_width, paddle_speed)
 		paddle2 = Paddle(screen_size[1] - paddle_vertical_margin, screen_size[0] / 2 - paddle_length / 2, paddle_length, paddle_width, paddle_speed)
 		self.paddles = [paddle1, paddle2]
-		self.ball = Ball(screen_size[0] / 2, screen_size[1] / 2, ball_radius, ball_speed, ball_velocity)
+		self.screen_size = screen_size
+		self.ball = Ball(screen_size[0] / 2, screen_size[1] / 2, ball_radius, ball_speed)
+		self.scores = [0, 0]
 
 	def set_p1(self, player):
 		self.p1 = player
@@ -35,3 +37,20 @@ class Game():
 
 	def get_ball(self):
 		return self.ball
+
+	def set_score(self, player, score):
+		self.scores[player] = score
+
+	def get_score(self, player):
+		return self.scores[player]
+
+	def increase_score(self, player):
+		self.set_score(player, self.get_score(player) + 1)
+
+	def reset_layout(self):
+		print(self.scores)
+		for paddle in self.paddles:
+			paddle.set_x_pos(self.screen_size[0] / 2 - paddle.get_length() / 2)
+		self.ball.set_x_pos(self.screen_size[0] / 2 - self.ball.get_radius() / 2)
+		self.ball.set_y_pos(self.screen_size[1] / 2 - self.ball.get_radius() / 2)
+		self.ball.set_velocity(self.ball.random_velocity())
