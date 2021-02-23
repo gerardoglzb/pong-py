@@ -18,6 +18,12 @@ class Game():
 	def set_p2(self, player):
 		self.p2 = player
 
+	def get_p1(self):
+		return self.p1
+
+	def get_p2(self):
+		return self.p2
+
 	def set_game_state(self, state):
 		self.game_state = state
 

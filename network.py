@@ -50,6 +50,12 @@ class Network:
     def move_paddle(self, movement):
         return self.send_pickle(f"move {self.player_id} {movement}")
 
+    def close_connection(self):
+        return self.send_pickle(f"close {self.player_id}")
+
+    def cancel_connection(self):
+        self.send_pickle(f"cancel {self.player_id}")
+
     def get_state(self):
         try:
             self.client.send(str.encode(f"state"))
