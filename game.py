@@ -47,6 +47,9 @@ class Game():
 	def increase_score(self, player):
 		self.set_score(player, self.get_score(player) + 1)
 
+	def get_scores(self):
+		return self.scores
+
 	def reset_layout(self):
 		print(self.scores)
 		for paddle in self.paddles:

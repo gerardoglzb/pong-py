@@ -10,12 +10,12 @@ server = "127.0.0.1"
 port = 5555
 encoding_format = 'utf-8'
 header = 64
-ball_speed = 5
+ball_speed = 3
 screen_size = (640, 360)
 paddle_vertical_margin = 75
 paddle_length = 75
 paddle_width = 12
-paddle_speed = 5
+paddle_speed = 10
 ball_radius = 5
 current_game = Game(screen_size, paddle_vertical_margin, paddle_length, paddle_width, paddle_speed, ball_radius, ball_speed)
 
