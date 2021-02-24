@@ -39,6 +39,7 @@ def game_thread(conn, p):
     while True:
         try:
             data_length = conn.recv(header).decode(encoding_format)
+            game_over = False
             if data_length:
                 data_length = int(data_length)
                 data = conn.recv(data_length).decode(encoding_format)
@@ -47,14 +48,14 @@ def game_thread(conn, p):
                     current_game.get_paddles()[int(data[1])-1].shift_x_pos(int(data[2]))
                     ball_state = current_game.get_ball().move(current_game.get_paddles(), screen_size)
                     if ball_state > 0:
-                        current_game.increase_score(ball_state-1)
+                        game_over = current_game.increase_score(ball_state-1)
                         current_game.reset_layout()
                 elif data[0] == "state":
                     conn.send(str.encode(f"{current_game.get_game_state().value}"))
                 elif data[0] == "cancel":
                     break
                 if data[0] == "move" or data[0] == "close":
-                    if data[0] == "close":
+                    if data[0] == "close" or game_over:
                         current_game.set_game_state(GameState.FINISHED)
                     message = pickle.dumps(current_game)
                     msg_length = len(message)
@@ -62,7 +63,7 @@ def game_thread(conn, p):
                     send_length += b' ' * (header - len(send_length))
                     conn.send(send_length)
                     conn.send(message)
-                    if data[0] == "close":
+                    if data[0] == "close" or game_over:
                         finished = True
                         break
         except Exception as e:
